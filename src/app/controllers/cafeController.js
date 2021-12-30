@@ -98,3 +98,75 @@ exports.getCategoryList = async function (req, res) {
         return res.send(isSuccess.false(500, `error: ${JSON.stringify(err)}`));
     }
 };
+
+//* 24. 인기글 조회
+exports.getPopularPost = async function (req, res) {
+    const cafeId= req.params.cafeId;
+
+    const getPopularPostQuery =   `select title, userId, img, viewCount,
+    (select count(idx) from commentInfo where commentInfo.postId= postInfo.idx) as commentCount,
+     case
+         when TIMESTAMPDIFF(HOUR, createdAt, CURRENT_TIMESTAMP) < 24
+             then DATE_FORMAT(createdAt, '%H:%i')
+         else DATE_FORMAT(createdAt, '%Y.%m.%d')
+     end as createTime
+    from postInfo
+    where cafeId=?
+    order by viewCount desc ;
+    `;
+
+    try {
+        const [getPopularPostRows] = await pool.query(getPopularPostQuery,[cafeId]);
+        res.send(isSuccess.true(200, "조회성공", getPopularPostRows));
+    } catch (err) {
+        logger.error(`Query error\n: ${JSON.stringify(err)}`);
+        return res.send(isSuccess.false(500, `error: ${JSON.stringify(err)}`));
+    }
+};
+
+//* 25. 글 검색
+exports.searchPost = async function (req, res) {
+    const word = req.query.word;
+
+    const searchPostQuery =   `select title, userId, img, viewCount,
+    (select count(idx) from commentInfo where commentInfo.postId= postInfo.idx) as commentCount,
+     case
+         when TIMESTAMPDIFF(HOUR, createdAt, CURRENT_TIMESTAMP) < 24
+             then DATE_FORMAT(createdAt, '%H:%i')
+         else DATE_FORMAT(createdAt, '%Y.%m.%d')
+     end as createTime
+    from postInfo
+    where concat(title, content) regexp ?;
+    `;
+
+    try {
+        const [searchPostRows] = await pool.query(searchPostQuery,[word]);
+        res.send(isSuccess.true(200, "조회성공", searchPostRows));
+    } catch (err) {
+        logger.error(`Query error\n: ${JSON.stringify(err)}`);
+        return res.send(isSuccess.false(500, `error: ${JSON.stringify(err)}`));
+    }
+};
+
+//* 26. 댓글 검색
+exports.searchComment = async function (req, res) {
+    const word = req.query.word;
+
+    const searchCommentQuery =   `select content, userId,
+    case
+        when TIMESTAMPDIFF(HOUR, createdAt, CURRENT_TIMESTAMP) < 24
+            then DATE_FORMAT(createdAt, '%H:%i')
+        else DATE_FORMAT(createdAt, '%Y.%m.%d')
+    end as createTime
+    from commentInfo
+    where concat(content) regexp ?;
+    `;
+
+    try {
+        const [searchCommentRows] = await pool.query(searchCommentQuery,[word]);
+        res.send(isSuccess.true(200, "조회성공", searchCommentRows));
+    } catch (err) {
+        logger.error(`Query error\n: ${JSON.stringify(err)}`);
+        return res.send(isSuccess.false(500, `error: ${JSON.stringify(err)}`));
+    }
+};

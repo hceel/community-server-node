@@ -8,4 +8,8 @@ module.exports = function(app){
 
     app.route('/:cafeId/category').post(cafe.createCategory);   //* 10. 카테고리 생성
     app.get('/:cafeId/category', cafe.getCategoryList);         //* 11. 카테고리 조회
+
+    app.get('/:cafeId/papular', cafe.getPopularPost)            //* 24. 인기글 조회
+    app.get('/:cafeId/search', cafe.searchPost);                //* 25. 글 검색
+    app.get('/:cafeId/search/comment', cafe.searchComment);     //* 26. 댓글 검색
 };
