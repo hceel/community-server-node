@@ -15,4 +15,6 @@ module.exports = function(app){
     app.route('/:postId/:commentId/recomment').post(jwtMiddleware, post.createRecomment);   //* 20. 대댓글 작성
     app.get('/:postId/comment', jwtMiddleware, post.getCommentList);                //*21. 댓글창 조회
 
+    app.get('/:cafeId/myPost', jwtMiddleware, post.getMyPostList);                  //* 22. 내가 작성한 글 조회
+    app.get('/:cafeId/myCommentPost', jwtMiddleware, post.getMyCommentList);        //* 23. 내가 댓글 단 글 조회
 };
